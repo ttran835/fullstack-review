@@ -1,51 +1,113 @@
 const mongoose = require('mongoose');
+const Promise = require('bluebird');
+
+// console.log(Promise);
+
 //during solution lecture;
   //ask about this statement vs How to determine if the right database is chosen. s
   //("mongodb://localhost:27017/node-demo")
 mongoose.connect('mongodb://localhost/fetcher');
 
-//the function save should save the information
-//passed in from the controller to the server to the database to save some sort of info into the DB
-//Once we create the new MongooseDB => convert to JSON.stringify
-  //Should we be parsing the body? But how would you even test if such thing is working? 
-  
 
+//test data example [];
+const exampleData = [];
+
+//actual code;
 let repoSchema = mongoose.Schema({
   id: Number,
+  node_id: Number,
   name: 'string',
   full_name: 'string',
-  avatar_url: 'string',
-  description: 'string',
-  html_url: 'string'
+  owner: {
+    login: 'string',
+    id: 'string',
+    avatar_url: 'string',
+    url: 'string'  
+  },
+  html_url: 'string',
+  description: 'string'
 });
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = (gitHubInfo) => {
-  // TODO: Your code here
-  // This function should save a repo or repos to
-  // the MongoDB
-}
+let save = (repo) => { 
+  
+  let saveRepo = new Repo ({
+    id: repo.id,
+    node_id: repo.node_id,
+    name: repo.name,
+    full_name: repo.full_name,
+    owner: {
+      login: repo.owner.login,
+      id: repo.owner.id,
+      avatar_url: repo.owner.avatar_url,
+      url: repo.owner.url  
+    },
+    html_url: repo.html_url,
+    description: repo.description
+  });
 
+  saveRepo.save(err => {
+    if(err) {
+      console.log(err);
+    }
+  });
+};
+
+//the save is a call back
 module.exports.save = save;
+
+/*
+var promises = actions.map(function(arr) {
+  return MyModel.findOneAndUpdate(arr.query, arr.upsertData, {'upsert': true}).exec();
+});
+
+let save = (githubRepos) => { 
+  Promise.all(Promise.map(githubRepos, repo => {
+    let saveRepo = new Repo ({
+      _id: repo.id,
+      name: repo.name,
+      full_name: repo.full_name,
+      owner: {
+        login: repo.owner.login,
+        id: repo.id,
+        avatar_url: repo.owner.avatar_url,
+        url: repo.url  
+      },
+      html_url: repo.html_url,
+      description: repo.description
+    });
+    saveRepo.save(err => {
+      if(err) {
+        console.log(err);
+      }
+    });
+  }))
+  .catch(err => {
+    if (err) {
+      console.log(err)
+    }
+  });
+};
+
+
+Trying with Promise, maybe let's try with something else... 
+
+
+
+*/
 
 
 /*
- var mongoose = require('mongoose');
-  var Schema = mongoose.Schema;
 
-  var blogSchema = new Schema({
-    title:  String,
-    author: String,
-    body:   String,
-    comments: [{ body: String, date: Date }],
-    date: { type: Date, default: Date.now },
-    hidden: Boolean,
-    meta: {
-      votes: Number,
-      favs:  Number
-    }
-  });
-
+  "id": 18221276,
+    "name": "git-consortium",
+    "full_name": "octocat/git-consortium",
+    "owner": {
+      "login": "octocat",
+      "id": 583231,
+      "avatar_url": "https://avatars0.githubusercontent.com/u/583231?v=3",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/octocat",
 
 */

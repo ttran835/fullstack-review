@@ -20,16 +20,9 @@ app.post('/repos', function (req, res) {
       console.log(err);
     } else {
       let parsedDatas = JSON.parse(datas);
-
-      parsedDatas.map(data => {
-        console.log(data);
-      });
+      db.save(parsedDatas);
     }
   })
-  // TODO - your code here!
-  // This route should take the github username provided
-  // and get the repo information from the github API, then
-  // save the repo information in the database
 });
 
 //I need to import another function

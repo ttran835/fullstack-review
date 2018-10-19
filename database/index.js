@@ -7,10 +7,14 @@ const Promise = require('bluebird');
   //ask about this statement vs How to determine if the right database is chosen. 
   //("mongodb://localhost:27017/node-demo")
 
-mongoose.connect('mongodb://localhost/fetcher');
+mongoose.connect('mongodb://localhost/fetcher')
+  .then(() => {
+    console.log('connected to DB');
+  }).catch(err => {
+    throw err;
+  });
 
-
-//actual code;
+//Schema 
 let repoSchema = mongoose.Schema({
   id: Number,
   node_id: Number,
@@ -27,38 +31,66 @@ let repoSchema = mongoose.Schema({
 }); 
 
 let Repo = mongoose.model('Repo', repoSchema);
-
-
+//Could be that I am looping thru the information inside here,
+//but the post is getting saved into the data. 
+//handling returned Info
 let save = (githubRepos) => { 
   //Need to return Promise here.
-  return Promise.all(githubRepos.map(repo => {
-    let saveRepo = new Repo ({
-      _id: repo.id,
-      name: repo.name,
-      full_name: repo.full_name,
-      owner: {
-        login: repo.owner.login,
-        id: repo.id,
-        avatar_url: repo.owner.avatar_url,
-        url: repo.url  
-      },
-      html_url: repo.html_url,
-      description: repo.description
-    });
-    //findOneAndUpdate handles all existing datas 
-   return Repo.findOneAndUpdate({id: repo.id}, saveRepo, { upsert: true }, (err) => {
-     console.log(err);
-   });
-  })).catch(err => {
-    if (err) {
+  return Promise.all(githubRepos)
+    .then( data => {
+      data.map(repo => {
+        let saveRepo = new Repo ({
+          id: repo.id,
+          name: repo.name,
+          full_name: repo.full_name,
+          owner: {
+            login: repo.owner.login,
+            id: repo.id,
+            avatar_url: repo.owner.avatar_url,
+            url: repo.url  
+          },
+          html_url: repo.html_url,
+          description: repo.description
+        });
+        //findOneAndUpdate handles all existing datas 
+        return Repo.findOneAndUpdate({id: repo.id}, saveRepo, { upsert: true }, (err) => {
+          console.log(err);
+        });
+      });
+    })
+    .catch(err => {
+      if (err) {
       throw (err);
-    }
-  });
+      }
+    });
+};
+//Just use mongo docs
+let findData = (callback) => {
+  Repo.find({})
+    .limit(25)
+    .exec((err, data) => {
+      if (err) {
+        console.log(err);
+        callback(err);
+      } else {
+        callback(null, data);
+      }
+    })
 };
 
+// let findData2 = () => {
+//   Repo.find({}).limit(25);
+// };
+
+// console.log(findData2());
+
+// Repo.find({}).limit(25);
+
+// console.log(findData())
 
 //the save is a call back
 module.exports.save = save;
+module.exports.findData = findData;
 
 /*
 
@@ -112,6 +144,33 @@ Trying with Promise, maybe let's try with something else...
 
 /*
 
+
+let save = (githubRepos) => { 
+  //Need to return Promise here.
+  return Promise.all(githubRepos.map(repo => {
+    let saveRepo = new Repo ({
+      _id: repo.id,
+      name: repo.name,
+      full_name: repo.full_name,
+      owner: {
+        login: repo.owner.login,
+        id: repo.id,
+        avatar_url: repo.owner.avatar_url,
+        url: repo.url  
+      },
+      html_url: repo.html_url,
+      description: repo.description
+    });
+    //findOneAndUpdate handles all existing datas 
+   return Repo.findOneAndUpdate({id: repo.id}, saveRepo, { upsert: true }, (err) => {
+     console.log(err);
+   });
+  })).catch(err => {
+    if (err) {
+      throw (err);
+    }
+  });
+};
   "id": 18221276,
     "name": "git-consortium",
     "full_name": "octocat/git-consortium",

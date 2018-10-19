@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import Search from './components/Search.jsx';
 import RepoList from './components/RepoList.jsx';
+// import css from '../src/css/stylesheet.css';
 
 class App extends React.Component {
   constructor(props) {
@@ -10,19 +11,23 @@ class App extends React.Component {
     this.state = { 
       repos: []
     }
+  //bound this context to getData; 
+
+  this.getData.bind(this);
+  this.search.bind(this);
+
 
   }
 
-  fetch () {
+  getData() {
+    let context = this
     $.ajax({
-      type: "GET",
       url: '/repos',
-      dataType: 'text/json',
-      data: {
-        query: term
-      },
+      method: "GET",
+      type: 'application/javascript',
       success: data => {
-        console.log(`data received ${data}`);
+        console.log('what is this data?', data);
+        context.setState( { repos: data } );
       },
       error: err => {
         console.log('there is an err ', err);
@@ -30,17 +35,26 @@ class App extends React.Component {
     });
   }
 
-  search (term) {
+  componentDidMount () {
+    console.log(this.getData())
+    this.getData();
+  };
 
+  search (term) {
+    let context = this;
     $.ajax({
-      type: "POST",
       url: '/repos',
+      method: "POST",
+      //data doesnt have any information inside it
+      //have to set the req.body data to something else prior to grabbing the info.
       data: {
         query: term
       },
-      dataType: 'text/json',
+      type: 'application/json',
       success: data => {
+        //success will automatically refreshes the page. 
         console.log(`data received ${data}`);
+        // context.getData();
       },
       error: err => {
         console.log('there is an err ', err);
@@ -74,3 +88,5 @@ var saveData = $.ajax({
       success: function(resultData) { alert("Save Complete") }
 });
 */
+
+
